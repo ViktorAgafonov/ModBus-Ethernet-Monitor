@@ -1,0 +1,17 @@
+{
+  "name": "modbusethermon",
+  "version": "1.0.0",
+  "description": "Универсальный Монитор ModBus по Ethernet на Node.js",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "child_process": "^1.0.2"
+  }
+}

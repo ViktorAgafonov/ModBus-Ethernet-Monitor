@@ -1,0 +1,37 @@
+{
+  "default": {
+    "interval": 5000,
+    "enabled": true,
+    "startTime": "00:00:00",
+    "endTime": "23:59:59"
+  },
+  "devices": {
+    "device1": {
+      "interval": 10000,
+      "enabled": true,
+      "startTime": "00:00:00",
+      "endTime": "23:59:59"
+    },
+    "device2": {
+      "interval": 30000,
+      "enabled": true,
+      "startTime": "00:00:00",
+      "endTime": "23:59:59"
+    }
+  },
+  "archiving": {
+    "dailyArchive": {
+      "enabled": true,
+      "time": "23:59:00"
+    },
+    "monthlyZip": {
+      "enabled": true,
+      "day": "last",
+      "time": "23:59:30"
+    },
+    "retention": {
+      "dailyFiles": 31,
+      "monthlyZips": 12
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "modbusethermon-frontend",
+  "version": "1.0.0",
+  "description": "Фронтенд для универсального монитора ModBus по Ethernet",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -p 8080 -c-1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chart.js": "^3.9.1",
+    "http-server": "^14.1.1"
+  }
+}

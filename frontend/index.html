@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModBusEtherMon - Универсальный Монитор ModBus по Ethernet</title>
+    <link rel="stylesheet" href="public/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Боковое меню -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>ModBusEtherMon</h1>
+                <button id="sidebar-toggle" class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" data-page="dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Панель мониторинга</a></li>
+                    <li><a href="#" data-page="devices"><i class="fas fa-microchip"></i> Устройства</a></li>
+                    <li><a href="#" data-page="archives"><i class="fas fa-archive"></i> Архивы</a></li>
+                    <li><a href="#" data-page="reports"><i class="fas fa-chart-line"></i> Отчеты</a></li>
+                    <li><a href="#" data-page="settings"><i class="fas fa-cog"></i> Настройки</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span id="user-info">Пользователь: <span id="username">Гость</span></span>
+                <a href="#" id="logout-btn" class="hidden"><i class="fas fa-sign-out-alt"></i> Выход</a>
+                <a href="#" id="login-btn"><i class="fas fa-sign-in-alt"></i> Вход</a>
+            </div>
+        </aside>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Верхняя панель -->
+            <header class="top-bar">
+                <div class="page-title">
+                    <h2 id="current-page-title">Панель мониторинга</h2>
+                </div>
+                <div class="top-bar-actions">
+                    <div class="connection-status">
+                        <span id="connection-indicator" class="indicator offline"></span>
+                        <span id="connection-text">Нет соединения с сервером</span>
+                    </div>
+                    <div class="time-display">
+                        <i class="far fa-clock"></i>
+                        <span id="current-time">00:00:00</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Контейнер для страниц -->
+            <div class="page-container">
+                <!-- Страница панели мониторинга -->
+                <div id="dashboard-page" class="page active">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-summary">
+                            <div class="summary-card">
+                                <div class="summary-icon">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                                <div class="summary-info">
+                                    <h3>Устройства</h3>
+                                    <p id="devices-count">0 активных</p>
+                                </div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-icon">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="summary-info">
+                                    <h3>Опросы</h3>
+                                    <p id="polls-count">0 сегодня</p>
+                                </div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="summary-info">
+                                    <h3>Ошибки</h3>
+                                    <p id="errors-count">0 ошибок</p>
+                                </div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-icon">
+                                    <i class="fas fa-archive"></i>
+                                </div>
+                                <div class="summary-info">
+                                    <h3>Архивы</h3>
+                                    <p id="archives-count">0 файлов</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-charts">
+                            <div class="chart-container">
+                                <h3>Активность устройств за последние 24 часа</h3>
+                                <canvas id="activity-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-devices">
+                            <h3>Состояние устройств</h3>
+                            <div id="devices-status" class="devices-status-grid">
+                                <!-- Устройства будут добавлены динамически -->
+                                <div class="device-status-card loading">
+                                    <div class="device-status-header">
+                                        <h4>Загрузка устройств...</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Страница устройств -->
+                <div id="devices-page" class="page">
+                    <div class="page-header">
+                        <h3>Управление устройствами</h3>
+                        <div class="page-actions">
+                            <button id="refresh-devices-btn" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Обновить
+                            </button>
+                            <button id="add-device-btn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Добавить устройство
+                            </button>
+                        </div>
+                    </div>
+                    <div class="devices-list-container">
+                        <table id="devices-table" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Название</th>
+                                    <th>IP-адрес</th>
+                                    <th>Порт</th>
+                                    <th>Unit ID</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Устройства будут добавлены динамически -->
+                                <tr>
+                                    <td colspan="7" class="text-center">Загрузка устройств...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Страница архивов -->
+                <div id="archives-page" class="page">
+                    <div class="page-header">
+                        <h3>Архивы данных</h3>
+                        <div class="page-actions">
+                            <button id="refresh-archives-btn" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Обновить
+                            </button>
+                            <button id="create-zip-btn" class="btn btn-primary">
+                                <i class="fas fa-file-archive"></i> Создать ZIP-архив
+                            </button>
+                        </div>
+                    </div>
+                    <div class="archives-container">
+                        <div class="archives-filter">
+                            <div class="filter-group">
+                                <label for="archive-month-filter">Месяц:</label>
+                                <select id="archive-month-filter">
+                                    <!-- Месяцы будут добавлены динамически -->
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="archive-type-filter">Тип:</label>
+                                <select id="archive-type-filter">
+                                    <option value="all">Все</option>
+                                    <option value="json">JSON</option>
+                                    <option value="zip">ZIP</option>
+                                </select>
+                            </div>
+                        </div>
+                        <table id="archives-table" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Тип</th>
+                                    <th>Размер</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Архивы будут добавлены динамически -->
+                                <tr>
+                                    <td colspan="4" class="text-center">Загрузка архивов...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Страница отчетов -->
+                <div id="reports-page" class="page">
+                    <div class="page-header">
+                        <h3>Генерация отчетов</h3>
+                    </div>
+                    <div class="reports-container">
+                        <div class="report-form">
+                            <div class="form-group">
+                                <label for="report-type">Тип отчета:</label>
+                                <select id="report-type">
+                                    <option value="daily">Ежедневный</option>
+                                    <option value="weekly">Еженедельный</option>
+                                    <option value="monthly">Ежемесячный</option>
+                                    <option value="custom">Произвольный период</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="report-device">Устройство:</label>
+                                <select id="report-device">
+                                    <option value="all">Все устройства</option>
+                                    <!-- Устройства будут добавлены динамически -->
+                                </select>
+                            </div>
+                            <div class="form-group date-range">
+                                <label for="report-start-date">Начальная дата:</label>
+                                <input type="date" id="report-start-date">
+                            </div>
+                            <div class="form-group date-range">
+                                <label for="report-end-date">Конечная дата:</label>
+                                <input type="date" id="report-end-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="report-format">Формат:</label>
+                                <select id="report-format">
+                                    <option value="excel">Excel (.xlsx)</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button id="generate-report-btn" class="btn btn-primary">
+                                    <i class="fas fa-file-export"></i> Сгенерировать отчет
+                                </button>
+                            </div>
+                        </div>
+                        <div class="report-history">
+                            <h4>История отчетов</h4>
+                            <table id="reports-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Дата создания</th>
+                                        <th>Тип</th>
+                                        <th>Период</th>
+                                        <th>Формат</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- История отчетов будет добавлена динамически -->
+                                    <tr>
+                                        <td colspan="5" class="text-center">Нет доступных отчетов</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Страница настроек -->
+                <div id="settings-page" class="page">
+                    <div class="page-header">
+                        <h3>Настройки системы</h3>
+                    </div>
+                    <div class="settings-container">
+                        <div class="settings-tabs">
+                            <button class="tab-btn active" data-tab="general">Общие</button>
+                            <button class="tab-btn" data-tab="polling">Опрос устройств</button>
+                            <button class="tab-btn" data-tab="archiving">Архивация</button>
+                            <button class="tab-btn" data-tab="users">Пользователи</button>
+                        </div>
+                        <div class="settings-content">
+                            <!-- Общие настройки -->
+                            <div id="general-tab" class="tab-content active">
+                                <form id="general-settings-form">
+                                    <div class="form-group">
+                                        <label for="server-address">Адрес сервера:</label>
+                                        <input type="text" id="server-address" value="http://localhost:3000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="refresh-interval">Интервал обновления (мс):</label>
+                                        <input type="number" id="refresh-interval" min="1000" step="1000" value="5000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="theme-select">Тема оформления:</label>
+                                        <select id="theme-select">
+                                            <option value="light">Светлая</option>
+                                            <option value="dark">Темная</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                                        <button type="reset" class="btn btn-secondary">Сбросить</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Настройки опроса устройств -->
+                            <div id="polling-tab" class="tab-content">
+                                <form id="polling-settings-form">
+                                    <div class="form-group">
+                                        <label for="default-interval">Интервал опроса по умолчанию (мс):</label>
+                                        <input type="number" id="default-interval" min="1000" step="1000" value="5000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="polling-enabled">Опрос включен:</label>
+                                        <input type="checkbox" id="polling-enabled" checked>
+                                    </div>
+                                    <div class="form-group time-range">
+                                        <label for="polling-start-time">Время начала опроса:</label>
+                                        <input type="time" id="polling-start-time" value="00:00">
+                                    </div>
+                                    <div class="form-group time-range">
+                                        <label for="polling-end-time">Время окончания опроса:</label>
+                                        <input type="time" id="polling-end-time" value="23:59">
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                                        <button type="reset" class="btn btn-secondary">Сбросить</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Настройки архивации -->
+                            <div id="archiving-tab" class="tab-content">
+                                <form id="archiving-settings-form">
+                                    <div class="form-group">
+                                        <label for="daily-archive-enabled">Ежедневное архивирование:</label>
+                                        <input type="checkbox" id="daily-archive-enabled" checked>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="daily-archive-time">Время архивирования:</label>
+                                        <input type="time" id="daily-archive-time" value="23:59">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="monthly-zip-enabled">Месячное ZIP-архивирование:</label>
+                                        <input type="checkbox" id="monthly-zip-enabled" checked>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="monthly-zip-day">День архивирования:</label>
+                                        <select id="monthly-zip-day">
+                                            <option value="last">Последний день месяца</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <!-- Остальные дни будут добавлены динамически -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="retention-daily">Хранить ежедневных архивов (дней):</label>
+                                        <input type="number" id="retention-daily" min="1" value="31">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="retention-monthly">Хранить месячных ZIP-архивов (месяцев):</label>
+                                        <input type="number" id="retention-monthly" min="1" value="12">
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                                        <button type="reset" class="btn btn-secondary">Сбросить</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Управление пользователями -->
+                            <div id="users-tab" class="tab-content">
+                                <div class="users-management">
+                                    <div class="users-list">
+                                        <h4>Список пользователей</h4>
+                                        <table id="users-table" class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Имя пользователя</th>
+                                                    <th>Роль</th>
+                                                    <th>Последний вход</th>
+                                                    <th>Действия</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Пользователи будут добавлены динамически -->
+                                                <tr>
+                                                    <td colspan="4" class="text-center">Загрузка пользователей...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="form-actions">
+                                            <button id="add-user-btn" class="btn btn-primary">
+                                                <i class="fas fa-user-plus"></i> Добавить пользователя
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="modal-container" class="modal-container hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Заголовок</h3>
+                <button id="modal-close" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modal-content" class="modal-content">
+                <!-- Содержимое модального окна будет добавлено динамически -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notifications-container" class="notifications-container"></div>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="public/js/api.js"></script>
+    <script src="public/js/auth.js"></script>
+    <script src="public/js/ui.js"></script>
+    <script src="public/js/dashboard.js"></script>
+    <script src="public/js/devices.js"></script>
+    <script src="public/js/archives.js"></script>
+    <script src="public/js/reports.js"></script>
+    <script src="public/js/settings.js"></script>
+    <script src="public/js/main.js"></script>
+</body>
+</html>

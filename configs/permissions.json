@@ -1,0 +1,73 @@
+{
+  "admin": [
+    {
+      "path": ".*",
+      "methods": ["*"],
+      "description": "Полный доступ ко всем ресурсам"
+    }
+  ],
+  "operator": [
+    {
+      "path": "^/api/modbus/.*",
+      "methods": ["GET", "POST"],
+      "description": "Доступ к чтению и управлению ModBus устройствами"
+    },
+    {
+      "path": "^/api/archives/.*",
+      "methods": ["GET"],
+      "description": "Доступ к чтению архивов"
+    },
+    {
+      "path": "^/api/reports/.*",
+      "methods": ["GET"],
+      "description": "Доступ к генерации отчетов"
+    },
+    {
+      "path": "^/api/config/.*",
+      "methods": ["GET"],
+      "description": "Доступ к чтению конфигурации"
+    },
+    {
+      "path": "^/api/auth/me",
+      "methods": ["GET"],
+      "description": "Доступ к информации о своем аккаунте"
+    },
+    {
+      "path": "^/api/auth/change-password",
+      "methods": ["POST"],
+      "description": "Возможность изменить свой пароль"
+    }
+  ],
+  "viewer": [
+    {
+      "path": "^/api/modbus/data.*",
+      "methods": ["GET"],
+      "description": "Доступ только к чтению данных ModBus устройств"
+    },
+    {
+      "path": "^/api/modbus/devices.*",
+      "methods": ["GET"],
+      "description": "Доступ к информации об устройствах"
+    },
+    {
+      "path": "^/api/archives/.*",
+      "methods": ["GET"],
+      "description": "Доступ к чтению архивов"
+    },
+    {
+      "path": "^/api/reports/.*",
+      "methods": ["GET"],
+      "description": "Доступ к генерации отчетов"
+    },
+    {
+      "path": "^/api/auth/me",
+      "methods": ["GET"],
+      "description": "Доступ к информации о своем аккаунте"
+    },
+    {
+      "path": "^/api/auth/change-password",
+      "methods": ["POST"],
+      "description": "Возможность изменить свой пароль"
+    }
+  ]
+}
